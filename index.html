@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Aventura Interactiva Pantalla Completa</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      background-color: #000;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .choices {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    .choices button {
+      background-color: rgba(30, 144, 255, 0.9);
+      border: none;
+      padding: 15px 30px;
+      font-size: 20px;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .choices button:hover {
+      background-color: rgba(0, 106, 209, 0.9);
+    }
+
+    .back-button {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: none;
+    }
+
+    .back-button button {
+      background-color: #444;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .back-button button:hover {
+      background-color: #222;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <video id="video" autoplay controls>
+      <source src="videos/intro.mp4" type="video/mp4">
+      Tu navegador no soporta video.
+    </video>
+
+    <div id="choices" class="choices"></div>
+
+    <div class="back-button" id="backContainer">
+      <button onclick="goBack()">⬅ Volver atrás</button>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const choices = document.getElementById('choices');
+    const backContainer = document.getElementById('backContainer');
+    let history = [];
+
+    video.addEventListener('ended', () => {
+      const src = video.currentSrc;
+
+      if (src.includes('intro.mp4')) {
+        showChoices([
+          { text: 'Ver a la izquierda', video: 'videos/caminoA.mp4' },
+          { text: 'Ver a la derecha', video: 'videos/caminoB.mp4' }
+        ]);
+      } else if (src.includes('caminoA.mp4')) {
+        showChoices([
+          { text: 'Puerta', video: 'videos/caminoC.mp4' },
+          { text: 'Piso', video: 'videos/caminoD.mp4' }
+        ]);
+      } else if (src.includes('caminoB.mp4')) {
+        showChoices([
+          { text: 'Puerta', video: 'videos/caminoC.mp4' },
+          { text: 'Piso', video: 'videos/caminoD.mp4' }
+        ]);
+      }
+    });
+
+    function showChoices(options) {
+      choices.innerHTML = '';
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.textContent = opt.text;
+        btn.onclick = () => {
+          history.push(video.currentSrc);
+          video.src = opt.video;
+          video.play();
+          choices.style.display = 'none';
+          updateBackButton();
+        };
+        choices.appendChild(btn);
+      });
+      choices.style.display = 'flex';
+    }
+
+    function goBack() {
+      if (history.length > 0) {
+        const previousVideo = history.pop();
+        video.src = previousVideo;
+        video.play();
+        choices.style.display = 'none';
+        updateBackButton();
+      }
+    }
+
+    function updateBackButton() {
+      backContainer.style.display = history.length > 0 ? 'block' : 'none';
+    }
+
+    window.addEventListener('load', updateBackButton);
+  </script>
+
+</body>
+</html>
